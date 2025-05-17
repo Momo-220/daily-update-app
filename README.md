@@ -1,77 +1,77 @@
 # Daily Updates App
 
-Une application web qui permet de suivre vos réalisations quotidiennes.
+A web application to track your daily accomplishments.
 
-## Fonctionnalités
+## Features
 
-- 📝 Création de mises à jour quotidiennes
-- 📊 Visualisation des mises à jour précédentes
-- 📈 Statistiques (nombre total, par jour, mots fréquents)
-- 👤 Profil utilisateur simple
+- 📝 Create daily updates
+- 📊 View your update history
+- 📈 Statistics (total count, daily breakdown, frequent words)
+- 👤 Simple user profile
 
-## Technologies utilisées
+## Technologies Used
 
-- **Frontend** : Next.js (React)
-- **Backend** : API Routes de Next.js
-- **UI** : Tailwind CSS et shadcn/ui
-- **Base de données** : Firebase Firestore
+- **Frontend**: Next.js (React)
+- **Backend**: Next.js API Routes
+- **UI**: Tailwind CSS and shadcn/ui
+- **Database**: Firebase Firestore
 
-## Comment démarrer
+## Getting Started
 
-1. Cloner le dépôt
-2. Installer les dépendances :
+1. Clone the repository
+2. Install dependencies:
    ```
    npm install
    ```
-3. Configurer Firebase :
-   - Pour des instructions détaillées, consultez [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
-   - Pour le développement rapide, vous pouvez ignorer cette étape car l'application utilisera une implémentation simulée
+3. Configure Firebase:
+   - For detailed instructions, see the Firebase setup documentation
+   - For quick development, you can skip this step as the app will use a mock implementation
 
-4. Lancer le serveur de développement :
+4. Start the development server:
    ```
    npm run dev
    ```
-5. Ouvrir [http://localhost:3000](http://localhost:3000) dans votre navigateur
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Structure du projet
+## Project Structure
 
-- `/src/app` - Pages de l'application (Next.js App Router)
-- `/src/components` - Composants React réutilisables
-- `/src/lib` - Utilitaires et services
-  - `firebase-admin.ts` - Configuration et utilitaires Firebase
-  - `updates.ts` - Opérations Firestore pour les mises à jour
-- `/src/types` - Types TypeScript
+- `/src/app` - Application pages (Next.js App Router)
+- `/src/components` - Reusable React components
+- `/src/lib` - Utilities and services
+  - `firebase-admin.ts` - Firebase configuration and utilities
+  - `updates.ts` - Firestore operations for updates
+- `/src/types` - TypeScript types
 
 ## API
 
-L'application expose les points d'API suivants :
+The application exposes the following API endpoints:
 
-- `GET /api/updates` - Récupère toutes les mises à jour
-- `POST /api/updates` - Crée une nouvelle mise à jour
-- `GET /api/stats` - Récupère les statistiques des mises à jour
+- `GET /api/updates` - Retrieve all updates
+- `POST /api/updates` - Create a new update
+- `GET /api/stats` - Get update statistics
 
-## Collection Firestore
+## Firestore Collection
 
-L'application utilise une collection Firestore nommée `updates` avec la structure suivante :
+The application uses a Firestore collection called `updates` with the following structure:
 ```
 {
-  id: string (automatiquement généré),
+  id: string (automatically generated),
   userId: string,
   content: string,
   createdAt: Timestamp
 }
 ```
 
-## Authentification
+## Authentication
 
-L'authentification est simulée dans cette version de l'application, avec un ID utilisateur fixe (1).
+Authentication is simulated in this version of the application, with a fixed user ID (1).
 
-## Mode de développement
+## Development Mode
 
-En mode développement, l'application utilisera une implémentation simulée de Firestore si les variables d'environnement Firebase ne sont pas configurées. Cela permet un développement rapide sans avoir besoin de configurer Firebase immédiatement.
+In development mode, the application will use a mock implementation of Firestore if Firebase environment variables are not configured. This allows for quick development without needing to set up Firebase immediately.
 
-Pour un déploiement en production, assurez-vous de configurer correctement les variables d'environnement comme décrit dans [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
+For production deployment, make sure to properly configure the environment variables as described in the Firebase setup documentation.
 
-## Licence
+## License
 
 MIT
