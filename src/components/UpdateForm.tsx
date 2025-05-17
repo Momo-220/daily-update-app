@@ -18,7 +18,7 @@ export function UpdateForm({ onUpdateCreated }: UpdateFormProps) {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
 
-  // Pour faire disparaître le message de succès après 3 secondes
+  // Hide success message after 3 seconds
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (showSuccessMessage) {
@@ -31,7 +31,7 @@ export function UpdateForm({ onUpdateCreated }: UpdateFormProps) {
     };
   }, [showSuccessMessage]);
 
-  // Pour arrêter les confettis après 2 secondes
+  // Stop confetti after 2 seconds
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (showConfetti) {

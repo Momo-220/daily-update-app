@@ -2,22 +2,38 @@
 
 import { Update } from "@/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Calendar, Clock } from "lucide-react";
+import { Calendar, Clock, RefreshCw } from "lucide-react";
 import { format } from "date-fns";
 import { enUS } from "date-fns/locale";
 
 interface UpdateHistoryProps {
   updates: Update[];
+  onRefresh?: () => void;
 }
 
-export function UpdateHistory({ updates }: UpdateHistoryProps) {
+export function UpdateHistory({ updates, onRefresh }: UpdateHistoryProps) {
+  const handleRefresh = () => {
+    if (onRefresh) {
+      onRefresh();
+    }
+  };
+
   if (updates.length === 0) {
     return (
       <Card className="w-full bg-white shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md">
         <CardHeader className="pb-2">
-          <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-transparent bg-clip-text">
-            Update History
-          </CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-transparent bg-clip-text">
+              Update History
+            </CardTitle>
+            <button 
+              onClick={handleRefresh} 
+              className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Refresh</span>
+            </button>
+          </div>
         </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12">
           <div className="text-teal-500 mb-6 p-4 bg-teal-50 rounded-full">
@@ -37,9 +53,18 @@ export function UpdateHistory({ updates }: UpdateHistoryProps) {
   return (
     <Card className="w-full bg-white shadow-sm border border-gray-200 transition-all duration-200 hover:shadow-md">
       <CardHeader className="pb-2">
-        <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-transparent bg-clip-text">
-          Update History
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="text-2xl font-semibold bg-gradient-to-r from-blue-600 to-cyan-600 text-transparent bg-clip-text">
+            Update History
+          </CardTitle>
+          <button 
+            onClick={handleRefresh} 
+            className="text-blue-500 hover:text-blue-700 flex items-center gap-1"
+          >
+            <RefreshCw className="h-4 w-4" />
+            <span>Refresh</span>
+          </button>
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {updates.map((update, index) => (

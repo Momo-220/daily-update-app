@@ -30,21 +30,44 @@ export async function getUpdates(): Promise<Update[]> {
 
 // Enregistrer une nouvelle mise à jour dans Firestore
 export async function saveUpdate(content: string, userId: string = "1"): Promise<Update> {
-  const updatesCol = getUpdatesCollection();
-  
-  const newUpdate = {
-    userId,
-    content,
-    createdAt: Timestamp.now(),
-  };
+  console.log("saveUpdate: Début avec content =", content, "et userId =", userId);
   
   try {
-    const docRef = await updatesCol.add(newUpdate);
-    const doc = await docRef.get();
+    const updatesCol = getUpdatesCollection();
+    console.log("saveUpdate: Collection updates récupérée");
     
-    return convertFirestoreDate<Update>(doc);
+    const newUpdate = {
+      userId,
+      content,
+      createdAt: Timestamp.now(),
+    };
+    console.log("saveUpdate: Objet mise à jour créé:", newUpdate);
+    
+    try {
+      console.log("saveUpdate: Tentative d'ajout à Firestore");
+      const docRef = await updatesCol.add(newUpdate);
+      console.log("saveUpdate: Document ajouté avec succès, id =", docRef.id);
+      
+      const doc = await docRef.get();
+      console.log("saveUpdate: Document récupéré après ajout");
+      
+      const result = convertFirestoreDate<Update>(doc);
+      console.log("saveUpdate: Document converti avec succès:", result);
+      return result;
+    } catch (innerError) {
+      console.error("saveUpdate: Erreur lors de l'ajout à Firestore:", innerError);
+      if (innerError instanceof Error) {
+        console.error("saveUpdate: Message d'erreur:", innerError.message);
+        console.error("saveUpdate: Stack trace:", innerError.stack);
+      }
+      throw innerError;
+    }
   } catch (error) {
-    console.error("Error saving update to Firestore:", error);
+    console.error("saveUpdate: Erreur générale:", error);
+    if (error instanceof Error) {
+      console.error("saveUpdate: Message d'erreur:", error.message);
+      console.error("saveUpdate: Stack trace:", error.stack);
+    }
     throw error;
   }
 }

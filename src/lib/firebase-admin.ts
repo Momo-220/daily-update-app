@@ -3,10 +3,11 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 // Vérifier si nous sommes en environnement de développement
 const isDevelopment = process.env.NODE_ENV === 'development';
+console.log("Firebase Admin Init - Mode:", isDevelopment ? "développement" : "production");
 
 // Configuration pour Firebase Admin
 const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID || "daily-updates-app",
+  projectId: process.env.FIREBASE_PROJECT_ID || "daily-update-app",
   // En production, ces valeurs doivent être définies dans les variables d'environnement
   // Pour le développement, nous utilisons des valeurs fictives
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL || "firebase-adminsdk@example.com",
@@ -15,14 +16,19 @@ const serviceAccount = {
     "-----BEGIN PRIVATE KEY-----\nMockPrivateKey\n-----END PRIVATE KEY-----\n"
 };
 
+console.log("Firebase Admin Config - Project ID:", serviceAccount.projectId);
+console.log("Firebase Admin Config - Client Email:", serviceAccount.clientEmail ? "défini" : "non défini");
+console.log("Firebase Admin Config - Private Key:", serviceAccount.privateKey ? "défini (masqué)" : "non défini");
+
+// Stockage de données en mémoire pour le mock Firestore
+const mockCollections: Record<string, any[]> = {
+  'updates': []
+};
+
 // Si nous n'avons pas les informations Firebase en dev, utiliser un mock
 const mockFirestore = () => {
   console.log("⚠️ Utilisation d'un mock Firestore en développement");
-  
-  // Stockage local des données
-  const collections: Record<string, any[]> = {
-    'updates': []
-  };
+  console.log("État actuel des collections:", JSON.stringify(mockCollections));
   
   // Créer une fonction mock pour simuler l'API Firestore
   return {
@@ -30,20 +36,21 @@ const mockFirestore = () => {
       add: async (data: any) => {
         const id = `mock-${Date.now()}`;
         const newDoc = { id, ...data };
-        collections[name] = collections[name] || [];
-        collections[name].push(newDoc);
+        mockCollections[name] = mockCollections[name] || [];
+        mockCollections[name].push(newDoc);
+        console.log(`Mock: Ajout d'un document à la collection ${name}:`, newDoc);
         return {
           id,
           get: async () => ({
             id,
-            data: () => data,
+            data: () => newDoc,
             exists: true
           })
         };
       },
       doc: (id: string) => ({
         get: async () => {
-          const doc = collections[name]?.find(d => d.id === id);
+          const doc = mockCollections[name]?.find(d => d.id === id);
           return {
             id,
             data: () => doc || null,
@@ -51,31 +58,31 @@ const mockFirestore = () => {
           };
         },
         set: async (data: any) => {
-          const index = collections[name]?.findIndex(d => d.id === id);
+          const index = mockCollections[name]?.findIndex(d => d.id === id);
           if (index >= 0) {
-            collections[name][index] = { id, ...data };
+            mockCollections[name][index] = { id, ...data };
           } else {
-            collections[name] = collections[name] || [];
-            collections[name].push({ id, ...data });
+            mockCollections[name] = mockCollections[name] || [];
+            mockCollections[name].push({ id, ...data });
           }
         },
         update: async (data: any) => {
-          const index = collections[name]?.findIndex(d => d.id === id);
+          const index = mockCollections[name]?.findIndex(d => d.id === id);
           if (index >= 0) {
-            collections[name][index] = { ...collections[name][index], ...data };
+            mockCollections[name][index] = { ...mockCollections[name][index], ...data };
           }
         },
         delete: async () => {
-          const index = collections[name]?.findIndex(d => d.id === id);
+          const index = mockCollections[name]?.findIndex(d => d.id === id);
           if (index >= 0) {
-            collections[name].splice(index, 1);
+            mockCollections[name].splice(index, 1);
           }
         }
       }),
       orderBy: () => ({
         get: async () => ({
-          empty: collections[name]?.length === 0,
-          docs: (collections[name] || []).map(doc => ({
+          empty: mockCollections[name]?.length === 0,
+          docs: (mockCollections[name] || []).map(doc => ({
             id: doc.id,
             data: () => doc,
             exists: true
@@ -83,8 +90,8 @@ const mockFirestore = () => {
         }),
         where: () => ({
           get: async () => ({
-            empty: collections[name]?.length === 0,
-            docs: (collections[name] || []).map(doc => ({
+            empty: mockCollections[name]?.length === 0,
+            docs: (mockCollections[name] || []).map(doc => ({
               id: doc.id,
               data: () => doc,
               exists: true
@@ -94,14 +101,17 @@ const mockFirestore = () => {
       }),
       where: () => ({
         orderBy: () => ({
-          get: async () => ({
-            empty: collections[name]?.length === 0,
-            docs: (collections[name] || []).map(doc => ({
-              id: doc.id,
-              data: () => doc,
-              exists: true
-            }))
-          })
+          get: async () => {
+            console.log(`Mock: Lecture de la collection ${name}:`, mockCollections[name] || []);
+            return {
+              empty: mockCollections[name]?.length === 0,
+              docs: (mockCollections[name] || []).map(doc => ({
+                id: doc.id,
+                data: () => doc,
+                exists: true
+              }))
+            };
+          }
         })
       })
     })
@@ -110,27 +120,33 @@ const mockFirestore = () => {
 
 // Initialiser l'application Firebase si elle n'est pas déjà initialisée
 export function getFirebaseAdmin() {
-  // En développement, si les variables d'environnement ne sont pas définies, 
-  // utiliser une implémentation simulée pour les tests
-  if (isDevelopment && (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_PRIVATE_KEY)) {
+  // En développement, utiliser une implémentation simulée pour les tests
+  if (isDevelopment) {
+    console.log("getFirebaseAdmin: Utilisation du mock Firestore en développement");
     return mockFirestore() as any;
   }
 
   if (getApps().length === 0) {
     try {
+      console.log("getFirebaseAdmin: Initialisation de Firebase Admin");
       initializeApp({
         credential: cert(serviceAccount as any)
       });
+      console.log("getFirebaseAdmin: Firebase Admin initialisé avec succès");
     } catch (error) {
       console.error("Erreur d'initialisation de Firebase Admin:", error);
       // En cas d'échec, retourner le mock en développement
       if (isDevelopment) {
+        console.log("getFirebaseAdmin: Fallback sur mock après erreur");
         return mockFirestore() as any;
       }
       throw error;
     }
+  } else {
+    console.log("getFirebaseAdmin: Firebase App déjà initialisé");
   }
   
+  console.log("getFirebaseAdmin: Retour de l'instance Firestore");
   return getFirestore();
 }
 
@@ -143,14 +159,33 @@ export function getUpdatesCollection() {
 // Convertir un document Firestore en objet Update
 export function convertFirestoreDate<T>(doc: FirebaseFirestore.DocumentData): T {
   const data = doc.data();
-  return {
+  console.log("convertFirestoreDate - data brute:", JSON.stringify(data));
+  
+  if (!data) {
+    console.error("convertFirestoreDate - Aucune donnée dans le document!");
+    return { id: doc.id } as T;
+  }
+  
+  // Gérer le cas où createdAt est déjà une chaîne (cas du mock)
+  let createdAtIso: string;
+  if (typeof data.createdAt === 'string') {
+    createdAtIso = data.createdAt;
+  } else if (data.createdAt instanceof Date) {
+    createdAtIso = data.createdAt.toISOString();
+  } else if (typeof data.createdAt?.toDate === 'function') {
+    createdAtIso = data.createdAt.toDate().toISOString();
+  } else {
+    // Fallback si createdAt n'est pas défini correctement
+    createdAtIso = new Date().toISOString();
+    console.warn("convertFirestoreDate - Format de date inconnu, utilisation de la date actuelle");
+  }
+  
+  const result = {
     ...data,
     id: doc.id,
-    // Convertir les timestamps Firestore en chaînes de date ISO
-    createdAt: data.createdAt instanceof Date 
-      ? data.createdAt.toISOString() 
-      : typeof data.createdAt?.toDate === 'function' 
-        ? data.createdAt.toDate().toISOString()
-        : data.createdAt
+    createdAt: createdAtIso
   } as T;
+  
+  console.log("convertFirestoreDate - résultat:", JSON.stringify(result));
+  return result;
 } 
