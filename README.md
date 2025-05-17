@@ -1,36 +1,77 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Daily Updates App
 
-## Getting Started
+Une application web qui permet de suivre vos réalisations quotidiennes.
 
-First, run the development server:
+## Fonctionnalités
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- 📝 Création de mises à jour quotidiennes
+- 📊 Visualisation des mises à jour précédentes
+- 📈 Statistiques (nombre total, par jour, mots fréquents)
+- 👤 Profil utilisateur simple
+
+## Technologies utilisées
+
+- **Frontend** : Next.js (React)
+- **Backend** : API Routes de Next.js
+- **UI** : Tailwind CSS et shadcn/ui
+- **Base de données** : Firebase Firestore
+
+## Comment démarrer
+
+1. Cloner le dépôt
+2. Installer les dépendances :
+   ```
+   npm install
+   ```
+3. Configurer Firebase :
+   - Pour des instructions détaillées, consultez [FIREBASE_SETUP.md](FIREBASE_SETUP.md)
+   - Pour le développement rapide, vous pouvez ignorer cette étape car l'application utilisera une implémentation simulée
+
+4. Lancer le serveur de développement :
+   ```
+   npm run dev
+   ```
+5. Ouvrir [http://localhost:3000](http://localhost:3000) dans votre navigateur
+
+## Structure du projet
+
+- `/src/app` - Pages de l'application (Next.js App Router)
+- `/src/components` - Composants React réutilisables
+- `/src/lib` - Utilitaires et services
+  - `firebase-admin.ts` - Configuration et utilitaires Firebase
+  - `updates.ts` - Opérations Firestore pour les mises à jour
+- `/src/types` - Types TypeScript
+
+## API
+
+L'application expose les points d'API suivants :
+
+- `GET /api/updates` - Récupère toutes les mises à jour
+- `POST /api/updates` - Crée une nouvelle mise à jour
+- `GET /api/stats` - Récupère les statistiques des mises à jour
+
+## Collection Firestore
+
+L'application utilise une collection Firestore nommée `updates` avec la structure suivante :
+```
+{
+  id: string (automatiquement généré),
+  userId: string,
+  content: string,
+  createdAt: Timestamp
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Authentification
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+L'authentification est simulée dans cette version de l'application, avec un ID utilisateur fixe (1).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Mode de développement
 
-## Learn More
+En mode développement, l'application utilisera une implémentation simulée de Firestore si les variables d'environnement Firebase ne sont pas configurées. Cela permet un développement rapide sans avoir besoin de configurer Firebase immédiatement.
 
-To learn more about Next.js, take a look at the following resources:
+Pour un déploiement en production, assurez-vous de configurer correctement les variables d'environnement comme décrit dans [FIREBASE_SETUP.md](FIREBASE_SETUP.md).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Licence
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
